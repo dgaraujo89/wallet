@@ -1,0 +1,30 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:17.3
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PG_DATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/database:/docker-entrypoint-initdb.d
+    networks:
+      - wallet_net
+
+  redis:
+    container_name: redis
+    image: redis:7.4.2-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - wallet_net
+
+networks:
+  wallet_net:
+
+volumes:
+  postgres_data:
+    driver: local
