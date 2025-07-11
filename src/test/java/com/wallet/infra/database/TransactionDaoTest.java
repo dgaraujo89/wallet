@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,7 +51,7 @@ class TransactionDaoTest {
         var expectedBalance = BigDecimal.TEN;
 
         when(transactionRepository.getBalanceByWalletIdAndDate(walletId, dateTime))
-                .thenReturn(expectedBalance);
+                .thenReturn(Optional.of(expectedBalance));
 
         var balance = transactionDao.loadBalanceByWallet(walletId, dateTime);
 

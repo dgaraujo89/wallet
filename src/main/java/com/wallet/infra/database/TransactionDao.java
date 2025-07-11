@@ -29,7 +29,8 @@ public class TransactionDao implements TransactionSavePort, TransactionFindPort 
 
     @Override
     public BigDecimal loadBalanceByWallet(UUID walletId, ZonedDateTime dateTime) {
-        return transactionRepository.getBalanceByWalletIdAndDate(walletId, dateTime);
+        return transactionRepository.getBalanceByWalletIdAndDate(walletId, dateTime)
+                .orElse(BigDecimal.ZERO);
     }
 
 }

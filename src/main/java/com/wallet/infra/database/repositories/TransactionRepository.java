@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -18,6 +19,6 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "WHERE wallet_id = :wallet_id" +
             "   AND created_at < :date",
             nativeQuery = true)
-    BigDecimal getBalanceByWalletIdAndDate(UUID wallet_id, ZonedDateTime date);
+    Optional<BigDecimal> getBalanceByWalletIdAndDate(UUID wallet_id, ZonedDateTime date);
 
 }

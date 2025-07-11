@@ -1,0 +1,50 @@
+services:
+  postgres:
+    container_name: postgres
+    hostname: postgres
+    image: postgres:17.3
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PG_DATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/database:/docker-entrypoint-initdb.d
+    networks:
+      - wallet_net
+
+  redis:
+    container_name: redis
+    hostname: redis
+    image: redis:7.4.2-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - wallet_net
+
+  wallet-app:
+    container_name: wallet-app
+    hostname: wallet-app
+    image: wallet-app:latest
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wallet?sslmode=disable
+      SPRING_DATASOURCE_USERNAME: wallet_api
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - wallet_net
+
+networks:
+  wallet_net:
+
+volumes:
+  postgres_data:
+    driver: local
