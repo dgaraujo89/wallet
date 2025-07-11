@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Idempotent {
-    String header() default "X-Correlation-ID";
+    String header() default IdempotencyConstants.DEFAULT_HEADER;
 }

@@ -1,12 +1,15 @@
 package com.wallet.entrypoints.web;
 
-import com.wallet.entrypoints.web.dto.request.RequestDTOMapper;
 import com.wallet.entrypoints.web.dto.request.CreateUserRequestDTO;
+import com.wallet.entrypoints.web.dto.request.RequestDTOMapper;
 import com.wallet.entrypoints.web.dto.response.ErrorDTO;
-import com.wallet.entrypoints.web.dto.response.UserResponseDTO;
 import com.wallet.entrypoints.web.dto.response.ResponseDTOMapper;
+import com.wallet.entrypoints.web.dto.response.UserResponseDTO;
+import com.wallet.idempotency.Idempotent;
+import com.wallet.idempotency.IdempotentArg;
 import com.wallet.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,9 +21,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.wallet.idempotency.IdempotencyConstants.DEFAULT_HEADER;
 
 @RestController
 @RequestMapping("/v1/users")
@@ -45,7 +51,10 @@ public class UsersController {
             @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(
                     schema = @Schema(implementation = ErrorDTO.class))),
     })
-    public UserResponseDTO createUser(@RequestBody @Validated CreateUserRequestDTO userDto) {
+    @Idempotent
+    public UserResponseDTO createUser(
+            @Parameter(description = "Correlation ID for request tracking") @RequestHeader(DEFAULT_HEADER) final String correlationId,
+            @IdempotentArg @RequestBody @Validated CreateUserRequestDTO userDto) {
         final var user = RequestDTOMapper.toDomain(userDto);
         return responseDTOMapper.fron(userService.createUser(user));
     }

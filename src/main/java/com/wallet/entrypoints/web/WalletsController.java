@@ -34,12 +34,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.ZonedDateTime;
 
+import static com.wallet.idempotency.IdempotencyConstants.DEFAULT_HEADER;
+
 @RestController
 @RequestMapping("/v1/wallets")
 @Tag(name = "Wallets", description = "Endpoints for managing wallets and transactions")
 public class WalletsController {
-
-    private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
 
     private final WalletService walletService;
     private final TransactionService transactionService;
@@ -63,7 +63,7 @@ public class WalletsController {
     @ResponseStatus(HttpStatus.CREATED)
     @Idempotent
     public WalletResponseDTO create(
-            @Parameter(description = "Correlation ID for request tracking") @RequestHeader(CORRELATION_ID_HEADER) final String correlationId,
+            @Parameter(description = "Correlation ID for request tracking") @RequestHeader(DEFAULT_HEADER) final String correlationId,
             @Parameter(description = "Wallet creation request") @IdempotentArg final WalletRequestDTO walletRequestDTO) {
         final var wallet = walletService.create(walletRequestDTO.document());
         return responseDTOMapper.from(wallet);
@@ -96,7 +96,7 @@ public class WalletsController {
     @Idempotent
     public TransactionResponseDTO deposit(
             @Parameter(description = "Wallet ID") @IdempotentArg @PathVariable final String id,
-            @Parameter(description = "Correlation ID for request tracking") @RequestHeader(CORRELATION_ID_HEADER) final String correlationId,
+            @Parameter(description = "Correlation ID for request tracking") @RequestHeader(DEFAULT_HEADER) final String correlationId,
             @Parameter(description = "Transaction details") @IdempotentArg @RequestBody final TransactionRequestDTO transactionRequestDTO) {
         final var transaction = transactionService.deposit(UuidCreator.fromString(id),
                 UuidCreator.fromString(correlationId),
@@ -120,7 +120,7 @@ public class WalletsController {
     @Idempotent
     public TransactionResponseDTO withdraw(
             @Parameter(description = "Wallet ID") @IdempotentArg @PathVariable final String id,
-            @Parameter(description = "Correlation ID for request tracking") @RequestHeader(CORRELATION_ID_HEADER) final String correlationId,
+            @Parameter(description = "Correlation ID for request tracking") @RequestHeader(DEFAULT_HEADER) final String correlationId,
             @Parameter(description = "Transaction details") @IdempotentArg @RequestBody final TransactionRequestDTO transactionRequestDTO) {
         final var transaction = transactionService.withdraw(UuidCreator.fromString(id),
                 UuidCreator.fromString(correlationId),
@@ -144,7 +144,7 @@ public class WalletsController {
     @Idempotent
     public TransferResponseDTO transfer(
             @Parameter(description = "Source wallet ID") @IdempotentArg @PathVariable final String id,
-            @Parameter(description = "Correlation ID for request tracking") @RequestHeader(CORRELATION_ID_HEADER) final String correlationId,
+            @Parameter(description = "Correlation ID for request tracking") @RequestHeader(DEFAULT_HEADER) final String correlationId,
             @Parameter(description = "Transfer details") @IdempotentArg @RequestBody final TransferRequestDTO transferRequestDTO) {
 
         final var transfer = transactionService.transfer(UuidCreator.fromString(id),
@@ -176,6 +176,5 @@ public class WalletsController {
             @RequestParam(required = false) final ZonedDateTime dateTime) {
         return responseDTOMapper.from(walletService.balance(UuidCreator.fromString(id), dateTime));
     }
-
 
 }

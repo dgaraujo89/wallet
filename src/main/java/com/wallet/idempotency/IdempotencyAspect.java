@@ -18,17 +18,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.wallet.idempotency.IdempotencyConstants.CACHE_EXPIRATION_SECONDS;
+import static com.wallet.idempotency.IdempotencyConstants.IDEMPOTENCY_CACHE_PREFIX;
+import static com.wallet.idempotency.IdempotencyConstants.IDEMPOTENCY_HASH_ALGORITHM;
+
 @Aspect
 public class IdempotencyAspect {
-
-    private static final String IDEMPOTENCY_CACHE_PREFIX = "idempotency:";
-    private static final long CACHE_EXPIRATION_SECONDS = 3600;
 
     private final MessageDigest digest;
     private final RedisTemplate<String, Object> redisTemplate;
 
     public IdempotencyAspect(RedisTemplate<String, Object> redisTemplate) throws NoSuchAlgorithmException {
-        this.digest = MessageDigest.getInstance("SHA-1");
+        this.digest = MessageDigest.getInstance(IDEMPOTENCY_HASH_ALGORITHM);
         this.redisTemplate = redisTemplate;
     }
 
