@@ -2,6 +2,7 @@ package com.wallet.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.wallet.domain.Wallet;
+import com.wallet.domain.WalletBalance;
 import com.wallet.domain.WalletStatus;
 import com.wallet.exceptions.NotFoundException;
 import com.wallet.services.ports.TransactionFindPort;

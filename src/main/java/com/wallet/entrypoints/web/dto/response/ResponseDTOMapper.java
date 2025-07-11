@@ -1,10 +1,9 @@
 package com.wallet.entrypoints.web.dto.response;
 
 import com.wallet.domain.Transaction;
-import com.wallet.domain.Transfer;
 import com.wallet.domain.User;
 import com.wallet.domain.Wallet;
-import com.wallet.services.WalletBalance;
+import com.wallet.domain.WalletBalance;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
