@@ -2,17 +2,14 @@ package com.wallet.infra.database.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -56,9 +53,6 @@ public class UserEntity {
 
     @Column(columnDefinition = "TIMESTAMP")
     private ZonedDateTime updatedAt;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private Set<WalletEntity> wallets;
 
     public Long getId() {
         return id;
@@ -162,14 +156,6 @@ public class UserEntity {
 
     public void setUpdatedAt(ZonedDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public Set<WalletEntity> getWallets() {
-        return wallets;
-    }
-
-    public void setWallets(Set<WalletEntity> wallets) {
-        this.wallets = wallets;
     }
 
     @Override

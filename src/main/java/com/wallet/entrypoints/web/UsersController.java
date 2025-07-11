@@ -1,10 +1,17 @@
 package com.wallet.entrypoints.web;
 
+import com.wallet.entrypoints.web.dto.request.RequestDTOMapper;
 import com.wallet.entrypoints.web.dto.request.CreateUserRequestDTO;
-import com.wallet.entrypoints.web.dto.request.CreateUserRequestDTOMapper;
+import com.wallet.entrypoints.web.dto.response.ErrorDTO;
 import com.wallet.entrypoints.web.dto.response.UserResponseDTO;
-import com.wallet.entrypoints.web.dto.response.UserResponseDTOMapper;
+import com.wallet.entrypoints.web.dto.response.ResponseDTOMapper;
 import com.wallet.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,30 +24,43 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1/users")
+@Tag(name = "Users", description = "Users management API")
 public class UsersController {
 
     private final UserService userService;
-    private final CreateUserRequestDTOMapper createUserRequestDTOMapper;
-    private final UserResponseDTOMapper userResponseDTOMapper;
+    private final RequestDTOMapper RequestDTOMapper;
+    private final ResponseDTOMapper responseDTOMapper;
 
-    public UsersController(UserService userService, CreateUserRequestDTOMapper createUserRequestDTOMapper, UserResponseDTOMapper userResponseDTOMapper) {
+    public UsersController(UserService userService, RequestDTOMapper RequestDTOMapper, ResponseDTOMapper responseDTOMapper) {
         this.userService = userService;
-        this.createUserRequestDTOMapper = createUserRequestDTOMapper;
-        this.userResponseDTOMapper = userResponseDTOMapper;
+        this.RequestDTOMapper = RequestDTOMapper;
+        this.responseDTOMapper = responseDTOMapper;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Create a new user", description = "Creates a new user in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(
+                    schema = @Schema(implementation = ErrorDTO.class))),
+    })
     public UserResponseDTO createUser(@RequestBody @Validated CreateUserRequestDTO userDto) {
-        final var user = createUserRequestDTOMapper.toDomain(userDto);
-        return userResponseDTOMapper.from(userService.createUser(user));
+        final var user = RequestDTOMapper.toDomain(userDto);
+        return responseDTOMapper.fron(userService.createUser(user));
     }
 
     @GetMapping("/{document}")
     @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get user by document", description = "Retrieves a user by their document number")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(
+                    schema = @Schema(implementation = ErrorDTO.class))),
+    })
     public UserResponseDTO getUser(@PathVariable("document") String document) {
         final var user = userService.findByDocument(document);
-        return userResponseDTOMapper.from(user);
+        return responseDTOMapper.fron(user);
     }
 
 }

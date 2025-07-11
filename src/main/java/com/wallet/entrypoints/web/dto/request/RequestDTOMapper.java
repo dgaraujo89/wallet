@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface CreateUserRequestDTOMapper {
+public interface RequestDTOMapper {
 
     @Mapping(target = "createdAt",
             expression = "java(java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC))")

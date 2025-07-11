@@ -5,7 +5,6 @@ import com.wallet.infra.database.converters.WalletStatusConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,8 +22,8 @@ public class WalletEntity {
     @Id
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.EAGER, targetEntity = UserEntity.class)
-    @JoinColumn(referencedColumnName = "user_id")
+    @ManyToOne(targetEntity = UserEntity.class)
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     private BigDecimal balance;
@@ -38,7 +37,7 @@ public class WalletEntity {
     @Column(columnDefinition = "TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @Column(nullable = false, columnDefinition = "TIMESTAMP")
+    @Column(columnDefinition = "TIMESTAMP")
     private ZonedDateTime lastTransactionAt;
 
     public UUID getId() {
