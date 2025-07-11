@@ -8,8 +8,10 @@ import com.wallet.entrypoints.web.dto.response.ErrorDTO;
 import com.wallet.entrypoints.web.dto.response.ResponseDTOMapper;
 import com.wallet.entrypoints.web.dto.response.TransactionResponseDTO;
 import com.wallet.entrypoints.web.dto.response.TransferResponseDTO;
+import com.wallet.entrypoints.web.dto.response.WalletBalanceResponseDTO;
 import com.wallet.entrypoints.web.dto.response.WalletResponseDTO;
 import com.wallet.services.TransactionService;
+import com.wallet.services.WalletBalance;
 import com.wallet.services.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,8 +27,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 
 @RestController
 @RequestMapping("/v1/wallets")
@@ -156,5 +162,16 @@ public class WalletsController {
                         .build())
                 .build();
     }
+
+    @Operation(summary = "Get wallet balance", description = "Retrieves wallet balance by its ID and optional dateTime")
+    @ApiResponse(responseCode = "200", description = "Balance retrieved successfully")
+    @GetMapping("/{id}/balance")
+    public WalletBalanceResponseDTO getBalance(
+            @Parameter(description = "Wallet ID") @PathVariable final String id,
+            @Parameter(description = "Optional date time to get historical balance")
+            @RequestParam(required = false) final ZonedDateTime dateTime) {
+        return responseDTOMapper.from(walletService.balance(UuidCreator.fromString(id), dateTime));
+    }
+
 
 }

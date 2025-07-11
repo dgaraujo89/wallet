@@ -5,6 +5,7 @@ import com.wallet.domain.TransactionType;
 import com.wallet.domain.Transfer;
 import com.wallet.domain.Wallet;
 import com.wallet.exceptions.NotFoundException;
+import com.wallet.services.ports.TransactionFindPort;
 import com.wallet.services.ports.TransactionSavePort;
 import com.wallet.services.ports.WalletFindPort;
 import com.wallet.services.ports.WalletUpdatePort;
@@ -23,7 +24,9 @@ public class TransactionService {
     private final WalletUpdatePort walletUpdatePort;
     private final TransactionSavePort transactionSavePort;
 
-    public TransactionService(WalletFindPort walletFindPort, WalletUpdatePort walletUpdatePort, TransactionSavePort transactionSavePort) {
+    public TransactionService(WalletFindPort walletFindPort,
+                              WalletUpdatePort walletUpdatePort,
+                              TransactionSavePort transactionSavePort) {
         this.walletFindPort = walletFindPort;
         this.walletUpdatePort = walletUpdatePort;
         this.transactionSavePort = transactionSavePort;

@@ -4,6 +4,7 @@ import com.wallet.domain.Transaction;
 import com.wallet.domain.Transfer;
 import com.wallet.domain.User;
 import com.wallet.domain.Wallet;
+import com.wallet.services.WalletBalance;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -18,4 +19,5 @@ public interface ResponseDTOMapper {
     @Mapping(target = "wallet", source = "wallet.id")
     TransactionResponseDTO from(Transaction transaction);
 
+    WalletBalanceResponseDTO from(WalletBalance balance);
 }
