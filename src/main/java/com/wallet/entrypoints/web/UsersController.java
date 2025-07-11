@@ -34,12 +34,12 @@ import static com.wallet.idempotency.IdempotencyConstants.DEFAULT_HEADER;
 public class UsersController {
 
     private final UserService userService;
-    private final RequestDTOMapper RequestDTOMapper;
+    private final RequestDTOMapper requestDTOMapper;
     private final ResponseDTOMapper responseDTOMapper;
 
-    public UsersController(UserService userService, RequestDTOMapper RequestDTOMapper, ResponseDTOMapper responseDTOMapper) {
+    public UsersController(UserService userService, RequestDTOMapper requestDTOMapper, ResponseDTOMapper responseDTOMapper) {
         this.userService = userService;
-        this.RequestDTOMapper = RequestDTOMapper;
+        this.requestDTOMapper = requestDTOMapper;
         this.responseDTOMapper = responseDTOMapper;
     }
 
@@ -55,7 +55,7 @@ public class UsersController {
     public UserResponseDTO createUser(
             @Parameter(description = "Correlation ID for request tracking") @RequestHeader(DEFAULT_HEADER) final String correlationId,
             @IdempotentArg @RequestBody @Validated CreateUserRequestDTO userDto) {
-        final var user = RequestDTOMapper.toDomain(userDto);
+        final var user = requestDTOMapper.toDomain(userDto);
         return responseDTOMapper.fron(userService.createUser(user));
     }
 

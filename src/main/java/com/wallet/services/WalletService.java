@@ -48,7 +48,7 @@ public class WalletService {
         return wallet;
     }
 
-    public Wallet findById(UUID id) {
+    public Wallet   findById(UUID id) {
         return walletFindPort.findById(id)
                 .orElseThrow(() -> new NotFoundException("Wallet not found."));
     }

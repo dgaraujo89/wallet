@@ -17,14 +17,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class WalletServiceTest {
@@ -50,40 +54,19 @@ class WalletServiceTest {
     @Test
     void shouldCreateWalletSuccessfully() {
         var document = "12345678900";
-        var wallet = Wallet.builder()
-                .user(User.builder()
-                        .document(document)
-                        .build())
-                .balance(BigDecimal.ZERO)
+        var user = User.builder()
+                .document(document)
                 .build();
 
-        when(userFindPort.findByDocument(document)).thenReturn(Optional.empty());
+        when(userFindPort.findByDocument(document)).thenReturn(Optional.of(user));
 
         assertDoesNotThrow(() -> walletService.create(document));
 
-        verify(userFindPort).findByDocument(document);
+        verify(userFindPort, times(1)).findByDocument(document);
         verify(walletCreatePort).create(walletCaptor.capture());
         assertEquals(document, walletCaptor.getValue().getUser().document());
         assertEquals(BigDecimal.ZERO, walletCaptor.getValue().getBalance());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenTryingToCreateExistingWallet() {
-        var wallet = Wallet.builder()
-                .user(User.builder()
-                        .document("12345678900")
-                        .build())
-                .balance(BigDecimal.ZERO)
-                .build();
-
-        when(userFindPort.findByDocument(wallet.getUser().document())).thenReturn(Optional.of(User.builder().build()));
-
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> walletService.create(wallet.getUser().document()));
-        assertEquals("Wallet already exists for this document.", exception.getMessage());
-
-        verify(userFindPort).findByDocument(wallet.getUser().document());
-        verify(walletCreatePort, never()).create(any());
+        assertNotNull(walletCaptor.getValue().getId());
     }
 
     @Test
@@ -121,68 +104,67 @@ class WalletServiceTest {
 
     @Test
     void shouldFindWalletByDocumentSuccessfully() {
-        var document = "12345678900";
         var user = User.builder()
-                .document(document)
+                .document("12345678900")
                 .build();
         var wallet = Wallet.builder()
+                .id(UuidCreator.getTimeOrderedEpoch())
                 .user(user)
                 .balance(BigDecimal.ZERO)
                 .build();
 
-        when(userFindPort.findByDocument(document)).thenReturn(Optional.of(user));
+        when(walletFindPort.findById(any())).thenReturn(Optional.of(wallet));
 
-        var foundWallet = assertDoesNotThrow(() -> walletService.findById(UuidCreator.fromString(document)));
+        var foundWallet = assertDoesNotThrow(() -> walletService.findById(wallet.getId()));
 
         assertEquals(wallet, foundWallet);
         verify(walletFindPort, times(1)).findById(any());
+        verifyNoInteractions(walletCreatePort);
+        verifyNoInteractions(transactionFindPort);
     }
 
     @Test
     void shouldThrowNotFoundExceptionWhenDocumentDoesNotExist() {
-        var document = "12345678900";
-
-        when(userFindPort.findByDocument(document)).thenReturn(Optional.empty());
+        when(walletFindPort.findById(any())).thenReturn(Optional.empty());
 
         var exception = assertThrows(NotFoundException.class,
-                () -> walletService.findById(UuidCreator.fromString(document)));
+                () -> walletService.findById(UuidCreator.getTimeOrderedEpoch()));
         assertEquals("Wallet not found.", exception.getMessage());
 
         verify(walletFindPort, times(1)).findById(any());
+        verifyNoInteractions(userFindPort);
+        verifyNoInteractions(walletCreatePort);
+        verifyNoInteractions(transactionFindPort);
     }
 
     @Test
     void shouldGetWalletBalanceSuccessfully() {
         var walletId = UuidCreator.getTimeOrderedEpoch();
-        var balance = BigDecimal.TEN;
-        var user = User.builder()
-                .document("12345678900")
-                .build();
-        var wallet = Wallet.builder()
-                .id(walletId)
-                .user(user)
-                .balance(balance)
-                .build();
 
-        when(walletFindPort.findById(walletId)).thenReturn(Optional.of(wallet));
+        when(transactionFindPort.loadBalanceByWallet(any(), any())).thenReturn(BigDecimal.TEN);
 
         var walletBalance = assertDoesNotThrow(() -> walletService.balance(walletId, null));
 
-        assertEquals(balance, walletBalance.balance());
-        verify(walletFindPort).findById(walletId);
+        assertEquals(BigDecimal.TEN, walletBalance.balance());
+
+        verify(transactionFindPort, times(1)).loadBalanceByWallet(any(), any());
+        verifyNoInteractions(userFindPort);
+        verifyNoInteractions(walletFindPort);
+        verifyNoInteractions(walletCreatePort);
+
     }
 
     @Test
-    void shouldThrowNotFoundExceptionWhenGettingBalanceForNonExistentWallet() {
-        var walletId = UuidCreator.getTimeOrderedEpoch();
+    void shouldGetZeroWhenGettingBalanceForNonExistentWallet() {
+        when(transactionFindPort.loadBalanceByWallet(any(), any())).thenReturn(BigDecimal.ZERO);
 
-        when(walletFindPort.findById(walletId)).thenReturn(Optional.empty());
+        var walletBalance = assertDoesNotThrow(() -> walletService.balance(UuidCreator.getTimeOrderedEpoch(), null));
+        assertEquals(BigDecimal.ZERO, walletBalance.balance());
 
-        var exception = assertThrows(NotFoundException.class,
-                () -> walletService.balance(walletId, null));
-        assertEquals("Wallet not found.", exception.getMessage());
-
-        verify(walletFindPort).findById(walletId);
+        verify(transactionFindPort, times(1)).loadBalanceByWallet(any(), any());
+        verifyNoInteractions(userFindPort);
+        verifyNoInteractions(walletFindPort);
+        verifyNoInteractions(walletCreatePort);
     }
 
 }
