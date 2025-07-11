@@ -64,7 +64,7 @@ public class WalletsController {
     @Idempotent
     public WalletResponseDTO create(
             @Parameter(description = "Correlation ID for request tracking") @RequestHeader(DEFAULT_HEADER) final String correlationId,
-            @Parameter(description = "Wallet creation request") @IdempotentArg final WalletRequestDTO walletRequestDTO) {
+            @Parameter(description = "Wallet creation request") @IdempotentArg @RequestBody final WalletRequestDTO walletRequestDTO) {
         final var wallet = walletService.create(walletRequestDTO.document());
         return responseDTOMapper.from(wallet);
     }
