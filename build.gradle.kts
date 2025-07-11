@@ -33,6 +33,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
     implementation("org.mapstruct:mapstruct:1.6.3")
     implementation("com.github.f4b6a3:uuid-creator:6.1.1")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.1")
     runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")

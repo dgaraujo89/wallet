@@ -1,6 +1,7 @@
 package com.wallet.entrypoints.web;
 
 import com.wallet.entrypoints.web.dto.response.ErrorDTO;
+import com.wallet.exceptions.IdempotencyException;
 import com.wallet.exceptions.NotFoundException;
 import com.wallet.exceptions.TransactionIdentificationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -49,6 +50,16 @@ public class ControllerExceptionHandler {
                 .status(CONFLICT.value())
                 .error(CONFLICT.getReasonPhrase())
                 .message("Transaction with provided correlation ID already exists.")
+                .build();
+    }
+
+    @ExceptionHandler(IdempotencyException.class)
+    @ResponseStatus(CONFLICT)
+    public ErrorDTO handleIdempotencyException(IdempotencyException e) {
+        return ErrorDTO.builder()
+                .status(CONFLICT.value())
+                .error(CONFLICT.getReasonPhrase())
+                .message(e.getMessage())
                 .build();
     }
 

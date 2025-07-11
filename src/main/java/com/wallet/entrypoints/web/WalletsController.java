@@ -10,16 +10,17 @@ import com.wallet.entrypoints.web.dto.response.TransactionResponseDTO;
 import com.wallet.entrypoints.web.dto.response.TransferResponseDTO;
 import com.wallet.entrypoints.web.dto.response.WalletBalanceResponseDTO;
 import com.wallet.entrypoints.web.dto.response.WalletResponseDTO;
+import com.wallet.idempotency.Idempotent;
+import com.wallet.idempotency.IdempotentArg;
 import com.wallet.services.TransactionService;
-import com.wallet.services.WalletBalance;
 import com.wallet.services.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
 @RestController
@@ -61,9 +61,10 @@ public class WalletsController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Idempotent
     public WalletResponseDTO create(
             @Parameter(description = "Correlation ID for request tracking") @RequestHeader(CORRELATION_ID_HEADER) final String correlationId,
-            @Parameter(description = "Wallet creation request") final WalletRequestDTO walletRequestDTO) {
+            @Parameter(description = "Wallet creation request") @IdempotentArg final WalletRequestDTO walletRequestDTO) {
         final var wallet = walletService.create(walletRequestDTO.document());
         return responseDTOMapper.from(wallet);
     }
@@ -92,10 +93,11 @@ public class WalletsController {
     })
     @PostMapping("/{id}/deposit")
     @ResponseStatus(HttpStatus.CREATED)
+    @Idempotent
     public TransactionResponseDTO deposit(
-            @Parameter(description = "Wallet ID") @PathVariable final String id,
+            @Parameter(description = "Wallet ID") @IdempotentArg @PathVariable final String id,
             @Parameter(description = "Correlation ID for request tracking") @RequestHeader(CORRELATION_ID_HEADER) final String correlationId,
-            @Parameter(description = "Transaction details") @RequestBody final TransactionRequestDTO transactionRequestDTO) {
+            @Parameter(description = "Transaction details") @IdempotentArg @RequestBody final TransactionRequestDTO transactionRequestDTO) {
         final var transaction = transactionService.deposit(UuidCreator.fromString(id),
                 UuidCreator.fromString(correlationId),
                 transactionRequestDTO.amount());
@@ -115,10 +117,11 @@ public class WalletsController {
     })
     @PostMapping("/{id}/withdraw")
     @ResponseStatus(HttpStatus.CREATED)
+    @Idempotent
     public TransactionResponseDTO withdraw(
-            @Parameter(description = "Wallet ID") @PathVariable final String id,
+            @Parameter(description = "Wallet ID") @IdempotentArg @PathVariable final String id,
             @Parameter(description = "Correlation ID for request tracking") @RequestHeader(CORRELATION_ID_HEADER) final String correlationId,
-            @Parameter(description = "Transaction details") @RequestBody final TransactionRequestDTO transactionRequestDTO) {
+            @Parameter(description = "Transaction details") @IdempotentArg @RequestBody final TransactionRequestDTO transactionRequestDTO) {
         final var transaction = transactionService.withdraw(UuidCreator.fromString(id),
                 UuidCreator.fromString(correlationId),
                 transactionRequestDTO.amount());
@@ -138,10 +141,11 @@ public class WalletsController {
     })
     @PostMapping("/{id}/transfer")
     @ResponseStatus(HttpStatus.CREATED)
+    @Idempotent
     public TransferResponseDTO transfer(
-            @Parameter(description = "Source wallet ID") @PathVariable final String id,
+            @Parameter(description = "Source wallet ID") @IdempotentArg @PathVariable final String id,
             @Parameter(description = "Correlation ID for request tracking") @RequestHeader(CORRELATION_ID_HEADER) final String correlationId,
-            @Parameter(description = "Transfer details") @RequestBody final TransferRequestDTO transferRequestDTO) {
+            @Parameter(description = "Transfer details") @IdempotentArg @RequestBody final TransferRequestDTO transferRequestDTO) {
 
         final var transfer = transactionService.transfer(UuidCreator.fromString(id),
                 UuidCreator.fromString(transferRequestDTO.wallet()),
